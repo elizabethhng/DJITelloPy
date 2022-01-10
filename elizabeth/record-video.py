@@ -5,7 +5,11 @@ from djitellopy import Tello
 tello = Tello()
 
 tello.connect()
-
+batt=tello.get_battery()
+if int(batt)<20:
+    print (" no battery", tello.get_battery())
+    sys.exit(0)
+print(batt)
 keepRecording = True
 tello.streamon()
 frame_read = tello.get_frame_read()
@@ -14,15 +18,14 @@ def videoRecorder():
     # create a VideoWrite object, recoring to ./video.avi
     # 创建一个VideoWrite对象，存储画面至./video.avi
     height, width, _ = frame_read.frame.shape
-    video = cv2.VideoWriter('video4.avi', cv2.VideoWriter_fourcc(*'XVID'), 30, (width, height))
+    video = cv2.VideoWriter('labvideo.avi', cv2.VideoWriter_fourcc(*'XVID'), 30, (width, height))
 
     while keepRecording:
         try:
             video.write(frame_read.frame)
             time.sleep(1 / 30)
         except KeyboardInterrupt:
-            keepRecording = False
-            recorder.join()
+            # keepRecording = False
             sys.exit(0)
     video.release()
 
@@ -42,27 +45,42 @@ print(tello.get_mission_pad_id())
 for i in range (0,4):
     pad = tello.get_mission_pad_id()
     if pad==1:
-        tello.go_xyz_speed_mid(0,0,100,10,1)
+        tello.go_xyz_speed_mid(0,0,150,10,1)
         print("m1 found")
         time.sleep(5)
         break
+    print("try" , i)
+
 
 # tello.move_up(100)
-tello.move_forward(50)
+tello.move_forward(100)
+time.sleep(0.1)
 tello.rotate_counter_clockwise(360)
-tello.move_back(55)
+time.sleep(1)
+tello.move_back(105)
+time.sleep(1)
 pad = tello.get_mission_pad_id()
+print("mission pad ", pad)
 # tello.move_down(20)
-while pad != 1:
+for i in range(1):
+    for i in range (10):
+        if pad != 1:
+            print("mission pad not found, trying")
+            time.sleep(5)
+            tello.send_command_with_return("command",5)
+            pad = tello.get_mission_pad_id()
+    print ("took ",i, " tries")
+    print("mission pad found")
+    time.sleep(1)
+    tello.go_xyz_speed_mid(0,0,20,10,1)
+    print("sleep")
     time.sleep(5)
-    print("mission pad not found")
-    pad = tello.get_mission_pad_id()
-tello.go_xyz_speed_mid(0,0,20,10,1)
-time.sleep(5)
-tello.disable_mission_pads()
 tello.land()
+tello.disable_mission_pads()
 tello.streamoff()
 print(tello.get_battery())
 
 keepRecording = False
 recorder.join()
+print("video saved")
+tello.end()

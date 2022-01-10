@@ -469,7 +469,7 @@ class Tello:
 
             self.LOGGER.debug("Command attempt #{} failed for command: '{}'".format(i, command))
 
-        self.raise_result_error(command, response)
+        # self.raise_result_error(command, response)
         return False # never reached
 
     def send_read_command(self, command: str) -> str:

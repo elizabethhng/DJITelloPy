@@ -4,11 +4,11 @@ from djitellopy import Tello
 # 创建Tello对象并连接
 tello = Tello()
 tello.connect()
-
+tello.land()
 # configure drone
 # 设置无人机
 tello.enable_mission_pads()
-tello.set_mission_pad_detection_direction(1)  # forward detection only  只识别前方
+tello.set_mission_pad_detection_direction(2)  # forward detection only  只识别前方
 
 tello.takeoff()
 
@@ -22,8 +22,8 @@ while pad != 1:
         tello.rotate_clockwise(90)
 
     if pad == 4:
-        tello.move_up(30)
-        tello.flip_forward()
+        tello.go_xyz_speed_mid(0,0,20,10,4)
+        tello.rotate_clockwise(30)
 
     pad = tello.get_mission_pad_id()
 
