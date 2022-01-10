@@ -2,8 +2,17 @@ import time, cv2, sys
 from threading import Thread
 from djitellopy import Tello
 
-tello = Tello()
+"""Load Revit Coordinates"""
+x_vector= sys.argv[1]
+y_vector= sys.argv[2]
+if x_vector <0:
+    x_left=True
+    x_vector=abs(x_vector)
+else:
+    x_left=False
 
+"""Start Tello"""
+tello = Tello()
 tello.connect()
 batt=tello.get_battery()
 if int(batt)<20:
@@ -31,50 +40,68 @@ def videoRecorder():
 
 # we need to run the recorder in a seperate thread, otherwise blocking options
 #  would prevent frames from getting added to the video
-# 我们需要在另一个线程中记录画面视频文件，否则其他的阻塞操作会阻止画面记录
 recorder = Thread(target=videoRecorder)
 recorder.start()
 
-tello.enable_mission_pads()
-tello.set_mission_pad_detection_direction(2) 
+"""mission pad landing"""
+# tello.enable_mission_pads()
+# tello.set_mission_pad_detection_direction(2) 
 
 tello.takeoff()
 time.sleep(2)
 
-print(tello.get_mission_pad_id())
-for i in range (0,4):
-    pad = tello.get_mission_pad_id()
-    if pad==1:
-        tello.go_xyz_speed_mid(0,0,150,10,1)
-        print("m1 found")
-        time.sleep(5)
-        break
-    print("try" , i)
-
-
+# print(tello.get_mission_pad_id())
+# for i in range (0,4):
+#     pad = tello.get_mission_pad_id()
+#     if pad==1:
+#         tello.go_xyz_speed_mid(0,0,150,10,1)
+#         print("m1 found")
+#         time.sleep(5)
+#         break
+#     print("try" , i)
 # tello.move_up(100)
-tello.move_forward(100)
+
+"""Move according to revit coordinates"""
+tello.move_forward(y_vector)
 time.sleep(0.1)
+
+if x_left:
+    tello.move_left(x_vector)
+else:
+    tello.move_right(x_vector)
+time.sleep(0.5)
+
 tello.rotate_counter_clockwise(360)
 time.sleep(1)
-tello.move_back(105)
+
+if x_left:
+    tello.move_right(x_vector)
+else:
+    tello.move_left(x_vector)
+time.sleep(0.5)
+
+tello.move_back(y_vector)
 time.sleep(1)
-pad = tello.get_mission_pad_id()
-print("mission pad ", pad)
-# tello.move_down(20)
-for i in range(1):
-    for i in range (10):
-        if pad != 1:
-            print("mission pad not found, trying")
-            time.sleep(5)
-            tello.send_command_with_return("command",5)
-            pad = tello.get_mission_pad_id()
-    print ("took ",i, " tries")
-    print("mission pad found")
-    time.sleep(1)
-    tello.go_xyz_speed_mid(0,0,20,10,1)
-    print("sleep")
-    time.sleep(5)
+
+"""mission pad landing"""
+# pad = tello.get_mission_pad_id()
+# print("mission pad ", pad)
+# # tello.move_down(20)
+
+# for i in range(1):
+#     for i in range (10):
+#         if pad != 1:
+#             print("mission pad not found, trying")
+#             time.sleep(5)
+#             tello.send_command_with_return("command",5)
+#             pad = tello.get_mission_pad_id()
+#     print ("took ",i, " tries")
+#     print("mission pad found")
+#     time.sleep(1)
+#     tello.go_xyz_speed_mid(0,0,20,10,1)
+#     print("sleep")
+#     time.sleep(5)
+
 tello.land()
 tello.disable_mission_pads()
 tello.streamoff()
