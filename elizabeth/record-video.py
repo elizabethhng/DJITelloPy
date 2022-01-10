@@ -1,6 +1,30 @@
-import time, cv2, sys
+import time, cv2, sys, os
 from threading import Thread
 from djitellopy import Tello
+
+def videoRecorder():
+    # create a VideoWrite object, recoring to ./video.avi
+    # 创建一个VideoWrite对象，存储画面至./video.avi
+    height, width, _ = frame_read.frame.shape
+    video = cv2.VideoWriter( f'{path}\DJITelloPy\elizabeth\drone_video_capture\{video_file}', cv2.VideoWriter_fourcc(*'XVID'), 30, (width, height))
+
+    while keepRecording:
+        try:
+            video.write(frame_read.frame)
+            time.sleep(1 / 30)
+        except KeyboardInterrupt:
+            # keepRecording = False
+            sys.exit(0)
+    video.release()
+
+def yolov5():
+    cmd= f"python {path}/yolov5/detect.py --weights {path_to_weights} --img 416 --conf 0.5 --source {path}\DJITelloPy\elizabeth\drone_video_capture\{video_file} --device 0 --name result_{video_file} "
+    os.system(cmd)
+
+
+video_file="avivideotest.avi"
+path= "C:/Users/65965/Desktop/School/FYPS2"
+path_to_weights= f"{path}/yolov5/weights/v8best.pt"
 
 """Load Revit Coordinates"""
 x_vector= sys.argv[1]
@@ -23,20 +47,7 @@ keepRecording = True
 tello.streamon()
 frame_read = tello.get_frame_read()
 
-def videoRecorder():
-    # create a VideoWrite object, recoring to ./video.avi
-    # 创建一个VideoWrite对象，存储画面至./video.avi
-    height, width, _ = frame_read.frame.shape
-    video = cv2.VideoWriter('labvideo.avi', cv2.VideoWriter_fourcc(*'XVID'), 30, (width, height))
 
-    while keepRecording:
-        try:
-            video.write(frame_read.frame)
-            time.sleep(1 / 30)
-        except KeyboardInterrupt:
-            # keepRecording = False
-            sys.exit(0)
-    video.release()
 
 # we need to run the recorder in a seperate thread, otherwise blocking options
 #  would prevent frames from getting added to the video
@@ -110,4 +121,9 @@ print(tello.get_battery())
 keepRecording = False
 recorder.join()
 print("video saved")
+
+
+yolo = Thread(target=yolov5)
+yolo.start()
 tello.end()
+
