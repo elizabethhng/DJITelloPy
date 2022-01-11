@@ -1,7 +1,6 @@
 import time, cv2, sys, os
 from threading import Thread
 from djitellopy import Tello
-import ffmpeg
 
 
 video_file="HOUSETEST.avi"
@@ -13,10 +12,11 @@ def videoRecorder():
     # 创建一个VideoWrite对象，存储画面至./video.avi
     height, width, _ = frame_read.frame.shape
     video = cv2.VideoWriter( f'{path}\DJITelloPy\elizabeth\drone_video_capture\{video_file}', cv2.VideoWriter_fourcc(*'XVID'), 30, (width, height))
-
+    time.sleep(5)
     while keepRecording:
         try:
-            video.write(frame_read.frame)
+            frame= cv2.cvtColor(frame_read.frame, cv2.COLOR_RGB2BGR)
+            video.write(frame)
             time.sleep(1 / 30)
         except KeyboardInterrupt:
             # keepRecording = False
@@ -46,16 +46,23 @@ if int(batt)<20:
     print (" no battery", tello.get_battery())
     sys.exit(0)
 print(batt)
+
 keepRecording = True
 tello.streamon()
 frame_read = tello.get_frame_read()
+time.sleep(5)
+tello.send_command_with_return("command")
+time.sleep(5)
+while frame_read.frame.all == 0:
+    print('0')
+print(frame_read.frame, f"moving by {x_vector}, {y_vector}")
 
-
-
-# we need to run the recorder in a seperate thread, otherwise blocking options
-#  would prevent frames from getting added to the video
 recorder = Thread(target=videoRecorder)
 recorder.start()
+
+""""Ensure frame and start recording"""
+
+
 
 """mission pad landing"""
 # tello.enable_mission_pads()

@@ -1,7 +1,6 @@
 import time, cv2, sys, os
 from threading import Thread
 from djitellopy import Tello
-import ffmpeg
 
 
 video_file="phone_test.avi"
