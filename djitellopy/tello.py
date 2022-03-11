@@ -41,7 +41,7 @@ class Tello:
 
     # Video stream, server socket
     VS_UDP_IP = '0.0.0.0'
-    VS_UDP_PORT = 11111
+    VS_UDP_PORT = '11111'
 
     CONTROL_UDP_PORT = 8889
     STATE_UDP_PORT = 8890
@@ -395,7 +395,8 @@ class Tello:
     def get_udp_video_address(self) -> str:
         """Internal method, you normally wouldn't call this youself.
         """
-        address_schema = 'udp://{ip}:{port}' + '?overrun_nonfatal=1&fifo_size=5000'
+        address_schema = 'udp://{ip}:{port}'  + '?overrun_nonfatal=1&fifo_size=278877'
+        # address_schema = 'udp://{ip}:{port}' + '?overrun_nonfatal=1&fifo_size=5000' ?overrunnonfatal=1&fifo_size=278877
         address = address_schema.format(ip=self.VS_UDP_IP, port=self.VS_UDP_PORT)
         return address
 

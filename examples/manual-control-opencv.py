@@ -20,16 +20,24 @@ tello.connect()
 
 tello.streamon()
 frame_read = tello.get_frame_read()
-
-tello.takeoff()
-
+height, width, _ = frame_read.frame.shape
+# tello.takeoff()
+nSnap   = 0
+# w       = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+# h       = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+w = width
+h= height
+folder = "."
+name = "snapshot"
+fileName    = "%s/%s_%d_%d_" %(folder, name, w, h)
 while True:
     # In reality you want to display frames in a seperate thread. Otherwise
     #  they will freeze while the drone moves.
     # 在实际开发里请在另一个线程中显示摄像头画面，否则画面会在无人机移动时静止
     img = frame_read.frame
     cv2.imshow("drone", img)
-
+    # height, width, _ = frame_read.frame.shape
+    # video = cv2.VideoWriter('video.avi', cv2.VideoWriter_fourcc(*'XVID'), 30, (width, height))
     key = cv2.waitKey(1) & 0xff
     if key == 27: # ESC
         break
@@ -46,8 +54,15 @@ while True:
     elif key == ord('q'):
         tello.rotate_counter_clockwise(30)
     elif key == ord('r'):
-        tello.move_up(30)
+        tello.send_command_with_return('downvision 0')
+        frame_read = tello.get_frame_read()
     elif key == ord('f'):
-        tello.move_down(30)
+        tello.send_command_with_return('downvision 1')
+        frame_read = tello.get_frame_read()
+    
+    elif key == ord(' '):
+        print("Saving image ", nSnap)
+        cv2.imwrite("%s%d-jpg"%(fileName, nSnap), img)
+        nSnap += 1
 
-tello.land()
+# tello.land()
